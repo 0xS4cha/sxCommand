@@ -36,7 +36,26 @@ try {
     if (-not $text.EndsWith('}')) { throw 'unexpected class layout' }
     $text = $text.Substring(0, $text.Length - 1).TrimEnd()
     $merged = $text + "`n`n" + [IO.File]::ReadAllText($engine, $utf8) + "}`n"
+
+    # the class gets its own name: AS2 classes are global to the minimap player, so a stock
+    # MINIMAP_LOADER loaded first by another resource would otherwise hide the engine methods
+    $renames = @(
+        @('class com.rockstargames.gtav.levelDesign.MINIMAP_LOADER ', 'class com.rockstargames.gtav.levelDesign.SX_COMMAND_LOADER '),
+        @('function MINIMAP_LOADER(', 'function SX_COMMAND_LOADER(')
+    )
+    foreach ($rename in $renames) {
+        $index = $merged.IndexOf($rename[0], [StringComparison]::Ordinal)
+        if ($index -lt 0) { throw "unexpected class layout: $($rename[0])" }
+        $merged = $merged.Substring(0, $index) + $rename[1] + $merged.Substring($index + $rename[0].Length)
+    }
     [IO.File]::WriteAllText($target, $merged, $utf8)
+
+    $frameSource = Join-Path $work 'base\scripts\frame_1\DoAction.as'
+    $frameTarget = Join-Path $work 'build\frame_1\DoAction.as'
+    New-Item -ItemType Directory -Force -Path (Split-Path $frameTarget) | Out-Null
+    $frame = [IO.File]::ReadAllText($frameSource, $utf8)
+    if (-not $frame.Contains('levelDesign.MINIMAP_LOADER(')) { throw 'unexpected frame script' }
+    [IO.File]::WriteAllText($frameTarget, $frame.Replace('levelDesign.MINIMAP_LOADER(', 'levelDesign.SX_COMMAND_LOADER('), $utf8)
 
     & java -jar $FFDec -onerror abort -importScript $base $output (Join-Path $work 'build')
     if ($LASTEXITCODE -ne 0) { throw 'ffdec failed to compile the overlay' }
