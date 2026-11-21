@@ -2,7 +2,8 @@
 
 Real time tactical command for **ESX or standalone** FiveM servers. Police, sheriff, EMS and sxIllegals groups share their positions on the minimap, their commander draws orders on the pause map, and every member can mark an enemy for the team. Everything is drawn by a custom minimap overlay (`.gfx`) written for this resource: real curves, soft gradients, hatching, dashed borders, animated arrows and units that glide with a trail.
 
-![Overlay](previews/overlay.png)
+![sxCommand](previews/image.png)
+![Overlay](previews/image2.png)
 
 *The overlay engine rendering a rally point, a perimeter, a hatched danger zone, an assault axis, units with trails, pings and the gunfire heat map (preview rendered outside the game).*
 
