@@ -9,8 +9,41 @@ function Atlas.Load()
     while not HasMinimapOverlayLoaded(overlay) do Wait(0) end
     SetMinimapOverlayDisplay(overlay, 0.0, 0.0, 100.0, 100.0, 100.0)
     Atlas.Call('SX_INIT')
+    Atlas.WatchView()
     return overlay
 end
+
+local view = 1.0
+
+function Atlas.SetView(scale)
+    view = scale
+    Atlas.Call('SX_VIEW', scale + 0.0)
+end
+
+function Atlas.WatchView()
+    CreateThread(function()
+        local paused = nil
+        while overlay ~= 0 do
+            local now = IsPauseMenuActive()
+            if now ~= paused then
+                paused = now
+                Atlas.SetView(now and Config.Display.pauseScale or 1.0)
+            end
+            Wait(100)
+        end
+    end)
+end
+
+RegisterCommand(Config.Display.scaleCommand, function(_, args)
+    local scale = tonumber(args[1])
+    if not scale or scale <= 0 then
+        print(('[sxCommand] pauseScale = %.2f'):format(Config.Display.pauseScale))
+        return
+    end
+    Config.Display.pauseScale = scale
+    if view ~= 1.0 or IsPauseMenuActive() then Atlas.SetView(scale) end
+    print(('[sxCommand] pauseScale = %.2f'):format(scale))
+end, false)
 
 function Atlas.Call(method, ...)
     if overlay == 0 then return end

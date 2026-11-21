@@ -6,6 +6,8 @@
    var sxPulse;
    var sxFlows;
    var sxPxPerUnit = 1;
+   var sxView = 1;
+   var sxSpecs;
 
    function SX_INIT()
    {
@@ -20,6 +22,7 @@
       this.sxPings = new Object();
       this.sxPulse = new Object();
       this.sxFlows = new Object();
+      this.sxSpecs = new Object();
       var order = ["heat","zones","orders","preview","pings","trails","markers"];
       var i = 0;
       while(i < order.length)
@@ -27,6 +30,7 @@
          var layer = this.sxRoot.createEmptyMovieClip(order[i],(i + 1) * 10);
          this.sxLayers[order[i]] = layer;
          this.sxShapes[order[i]] = new Object();
+         this.sxSpecs[order[i]] = new Object();
          i += 1;
       }
       this.sxRoot.onEnterFrame = mx.utils.Delegate.create(this,this.sxFrame);
@@ -39,6 +43,7 @@
       {
          this.sxLayers[name] = this.sxRoot.createEmptyMovieClip(name,this.sxRoot.getNextHighestDepth());
          this.sxShapes[name] = new Object();
+         this.sxSpecs[name] = new Object();
       }
       return this.sxLayers[name];
    }
@@ -75,12 +80,53 @@
          delete this.sxFlows[name + ":" + id];
       }
       this.sxShapes[name] = new Object();
+      this.sxSpecs[name] = new Object();
       this.sxLayers[name].clear();
    }
 
    function SX_LAYER_VISIBLE(name, visible)
    {
       this.sxLayer(name)._visible = visible;
+   }
+
+   function sxW(w)
+   {
+      return w / this.sxView;
+   }
+
+   function sxRemember(layerName, id, method, args)
+   {
+      this.sxLayer(layerName);
+      this.sxSpecs[layerName][id] = {method:method,args:args};
+   }
+
+   function SX_VIEW(scale)
+   {
+      this.SX_INIT();
+      if(!(scale > 0) || Math.abs(scale - this.sxView) < 0.001)
+      {
+         return undefined;
+      }
+      this.sxView = scale;
+      for(var name in this.sxSpecs)
+      {
+         var specs = this.sxSpecs[name];
+         for(var id in specs)
+         {
+            var spec = specs[id];
+            this[spec.method].apply(this,spec.args);
+         }
+      }
+      for(var mid in this.sxMarkers)
+      {
+         var m = this.sxMarkers[mid];
+         this.sxDrawMarkerIcon(m.icon,m.color,m.flags);
+         this.sxDrawTrail(m);
+      }
+      for(var pid in this.sxPings)
+      {
+         this.sxDrawPing(this.sxPings[pid]);
+      }
    }
 
    function sxNewShape(layerName, id)
@@ -105,6 +151,10 @@
       {
          shapes[id].removeMovieClip();
          delete shapes[id];
+      }
+      if(this.sxSpecs[layerName] != undefined)
+      {
+         delete this.sxSpecs[layerName][id];
       }
       delete this.sxPulse[layerName + ":" + id];
       delete this.sxFlows[layerName + ":" + id];
@@ -251,7 +301,7 @@
       {
          return undefined;
       }
-      mc.lineStyle(border,color,100,true,"none","round","round");
+      mc.lineStyle(this.sxW(border),color,100,true,"none","round","round");
       if(dashed)
       {
          var size = 0;
@@ -282,6 +332,7 @@
 
    function SX_SHAPE_CIRCLE(layerName, id, x, y, r, color, alpha, style, border, flags)
    {
+      this.sxRemember(layerName,id,"SX_SHAPE_CIRCLE",[layerName, id, x, y, r, color, alpha, style, border, flags]);
       var mc = this.sxNewShape(layerName,id);
       if(style == 2)
       {
@@ -300,7 +351,7 @@
       }
       else if(border > 0)
       {
-         outline.lineStyle(border,color,100,true,"none");
+         outline.lineStyle(this.sxW(border),color,100,true,"none");
          this.sxCirclePath(outline,x,y,r);
       }
       if((flags & 1) != 0)
@@ -311,6 +362,7 @@
 
    function SX_SHAPE_POLY(layerName, id, points, color, alpha, style, border, flags)
    {
+      this.sxRemember(layerName,id,"SX_SHAPE_POLY",[layerName, id, points, color, alpha, style, border, flags]);
       var pts = this.sxParsePoints(points);
       if(pts.length < 3)
       {
@@ -366,7 +418,7 @@
       var bx = x2 - ux * head;
       var by = y2 - uy * head;
       var pts = [{x:x1,y:y1},{x:bx,y:by}];
-      mc.lineStyle(width,color,100,true,"none","none","round");
+      mc.lineStyle(this.sxW(width),color,100,true,"none","none","round");
       if(flow)
       {
          this.sxDashed(mc,pts,false,head * 0.45,head * 0.3,offset);
@@ -387,6 +439,7 @@
 
    function SX_SHAPE_ARROW(layerName, id, x1, y1, x2, y2, color, width, flags)
    {
+      this.sxRemember(layerName,id,"SX_SHAPE_ARROW",[layerName, id, x1, y1, x2, y2, color, width, flags]);
       var mc = this.sxNewShape(layerName,id);
       var flow = (flags & 4) != 0;
       this.sxDrawArrow(mc,x1,y1,x2,y2,color,width,0,flow);
@@ -404,7 +457,7 @@
    {
       icon.clear();
       var size = (flags & 4) != 0 ? 10 : 7.5;
-      icon.lineStyle(2,0xFFFFFF,100,true,"none");
+      icon.lineStyle(this.sxW(2),0xFFFFFF,100,true,"none");
       icon.beginFill(color,100);
       this.sxCirclePath(icon,0,0,size);
       icon.endFill();
@@ -469,12 +522,17 @@
       {
          m.history.shift();
       }
+      this.sxDrawTrail(m);
+   }
+
+   function sxDrawTrail(m)
+   {
       var trail = m.trail;
       trail.clear();
       var i = 1;
       while(i < m.history.length)
       {
-         trail.lineStyle(3,color,i / m.history.length * 70,true,"none","round","round");
+         trail.lineStyle(this.sxW(3),m.color,i / m.history.length * 70,true,"none","round","round");
          trail.moveTo(m.history[i - 1].x,m.history[i - 1].y);
          trail.lineTo(m.history[i].x,m.history[i].y);
          i += 1;
@@ -503,18 +561,27 @@
       mc._x = x;
       mc._y = y;
       var dot = mc.createEmptyMovieClip("dot",2);
-      dot.lineStyle(2,0xFFFFFF,100,true,"none");
-      dot.beginFill(color,100);
+      var ring = mc.createEmptyMovieClip("ring",1);
+      var ping = {mc:mc,dot:dot,ring:ring,color:color,t0:getTimer(),life:life * 1000};
+      this.sxDrawPing(ping);
+      this.sxPings[id] = ping;
+   }
+
+   function sxDrawPing(ping)
+   {
+      var dot = ping.dot;
+      dot.clear();
+      dot.lineStyle(this.sxW(2),0xFFFFFF,100,true,"none");
+      dot.beginFill(ping.color,100);
       dot.moveTo(0,-8);
       dot.lineTo(8,0);
       dot.lineTo(0,8);
       dot.lineTo(-8,0);
       dot.lineTo(0,-8);
       dot.endFill();
-      var ring = mc.createEmptyMovieClip("ring",1);
-      ring.lineStyle(2,color,100,true,"none");
-      this.sxCirclePath(ring,0,0,10);
-      this.sxPings[id] = {mc:mc,ring:ring,t0:getTimer(),life:life * 1000};
+      ping.ring.clear();
+      ping.ring.lineStyle(this.sxW(2),ping.color,100,true,"none");
+      this.sxCirclePath(ping.ring,0,0,10);
    }
 
    function SX_HEAT(cell, data, color)
@@ -556,7 +623,7 @@
       {
          this.sxPxPerUnit = px;
       }
-      var inv = 100 / this.sxPxPerUnit;
+      var inv = 100 / (this.sxPxPerUnit * this.sxView);
       var wave = Math.sin(now / 260);
 
       for(var id in this.sxMarkers)
@@ -571,13 +638,13 @@
          m.halo.clear();
          if((m.flags & 1) != 0)
          {
-            m.halo.lineStyle(3,0xFF5A4F,60 + wave * 40,true,"none");
+            m.halo.lineStyle(this.sxW(3),0xFF5A4F,60 + wave * 40,true,"none");
             this.sxCirclePath(m.halo,0,0,13 + wave * 2);
          }
          var since = now - m.flash;
          if(since < 450)
          {
-            m.halo.lineStyle(3,0xFFC94D,100 - since / 4.5,true,"none");
+            m.halo.lineStyle(this.sxW(3),0xFFC94D,100 - since / 4.5,true,"none");
             this.sxCirclePath(m.halo,0,0,9 + since / 18);
          }
       }

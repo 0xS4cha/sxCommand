@@ -55,4 +55,6 @@ Config.Command = {
 
 Config.Display = {
     command = 'tactical',
+    pauseScale = 8.0,
+    scaleCommand = 'tacticalscale',
 }
