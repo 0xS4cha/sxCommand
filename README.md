@@ -97,6 +97,14 @@ The overlay is built from `gfx/base/MINIMAP_LOADER.gfx` and `gfx/src/sx_engine.a
 FFDEC=/path/to/ffdec-cli.jar ./gfx/build.sh
 ```
 
+On Windows, with Java 8 or newer in the `PATH`:
+
+```powershell
+.\gfx\build.ps1 -FFDec C:\path\to\ffdec-cli.jar
+```
+
+If PowerShell refuses to run the script, allow it for the current session with `Set-ExecutionPolicy -Scope Process Bypass`.
+
 Only the `MINIMAP_LOADER` class is recompiled, the other classes of the file stay untouched.
 
 ## Exports
