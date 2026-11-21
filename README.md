@@ -52,6 +52,7 @@ The server should run OneSync, the units are read from the server side player po
 | --- | --- |
 | `G` | Marks the aimed spot for your faction |
 | `/tactical` | Shows or hides the tactical display |
+| `/tacticalscale <value>` | Changes the size of the lines and icons on the pause map live, to find the right `pauseScale` |
 | `Space` in the pause map | Enters or leaves the command mode |
 | `Q` / `E` | Previous / next tool (commanders) |
 | `Enter` | Places the order or the point under the cursor |
@@ -77,6 +78,8 @@ All values live in `shared/config.lua`.
 | `Config.Heat` | Cell size, heat per shot, cooling and update interval of the heat map |
 | `Config.Command` | Frontend controls of the command mode and the distance that closes a perimeter |
 | `Config.Display.command` | Command that toggles the display |
+| `Config.Display.pauseScale` | How much larger the game draws the overlay on the pause map than on the minimap, lines and icons are divided by it there |
+| `Config.Display.scaleCommand` | Command that changes `pauseScale` live to calibrate it, the value is printed in the F8 console |
 
 ## How it works
 
