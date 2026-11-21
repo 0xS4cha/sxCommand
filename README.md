@@ -106,7 +106,7 @@ On Windows, with Java 8 or newer in the `PATH`:
 
 If PowerShell refuses to run the script, allow it for the current session with `Set-ExecutionPolicy -Scope Process Bypass`.
 
-Only the `MINIMAP_LOADER` class is recompiled, the other classes of the file stay untouched.
+Only the `MINIMAP_LOADER` class is recompiled, under the name `SX_COMMAND_LOADER`, the other classes of the file stay untouched. ActionScript classes are shared by every minimap overlay, so the engine needs its own class name to work next to resources that load the stock overlay, such as sxIllegals or sxHeat.
 
 ## Exports
 
