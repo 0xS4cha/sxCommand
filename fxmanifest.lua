@@ -4,7 +4,7 @@ game 'gta5'
 name 'sxCommand'
 description 'Real time tactical command on the minimap: squad positions, orders, intel pings and a gunfire heat map, ESX or standalone'
 author '0xS4cha'
-version '0.1.0'
+version '1.0.0'
 repository 'https://github.com/0xS4cha/sxCommand'
 
 lua54 'yes'
