@@ -53,7 +53,7 @@ local function key(control, fallback)
     return HelpUI.KeyLabel(control, fallback)
 end
 
-local function showCard()
+local function showCard(cursor)
     local tool = currentTool()
     local target = currentTarget()
     local plan = SX.Plans:Editing()
@@ -84,7 +84,7 @@ local function showCard()
     end
     rows[#rows + 1] = { type = 'keys', keys = keys }
 
-    HelpUI.ShowThisFrame('command', 'command', {
+    local shown = HelpUI.ShowThisFrame('command', 'command', {
         header = { subtitle = SX.Faction:Get().label, title = GetPhrase('command_title'), watermark = GetPhrase('command_watermark') },
         rows = rows,
         position = 'top-left',
@@ -92,17 +92,46 @@ local function showCard()
         pauseMenu = true,
         hide = { pauseMenu = false },
     }, ('%s:%d:%s:%s:%s'):format(tool, #draft, tostring(target), tostring(plan), tostring(canTarget())))
+    if shown or not Config.Display.mapHint then
+        Atlas.HideHint()
+        return
+    end
+
+    -- without sxHelpMenu, the same information is drawn next to the map cursor
+    local subtitle = SX.Faction:Get().label
+    if plan then subtitle = subtitle .. ' · ' .. GetPhrase('plan_label') .. ' : ' .. plan end
+    local title = GetPhrase('order_' .. tool)
+    if tool == 'perimeter' and #draft > 0 then
+        title = ('%s · %d'):format(title, #draft)
+    elseif tool == 'axis' then
+        title = title .. ' · ' .. GetPhrase(#draft == 0 and 'command_axis_start' or 'command_axis_end')
+    end
+    local mapKeys = {}
+    for i, entry in ipairs(keys) do
+        mapKeys[i] = { key = entry.key, label = entry.label }
+        if entry.label == GetPhrase('command_target') then
+            mapKeys[i].label = ('%s : %s'):format(entry.label, target or GetPhrase('command_target_all'))
+        end
+    end
+    Atlas.Hint(cursor.x, cursor.y, subtitle, title, mapKeys, plan and COLORS.perimeter or SX.Faction:Get().color)
 end
 
-local function showHint()
-    HelpUI.ShowThisFrame('command_hint', 'command_hint', {
-        header = { subtitle = SX.Faction:Get().label, title = GetPhrase('command_hint_title') },
-        rows = { { type = 'keys', keys = { { key = key(Config.Command.toggle, 'SPACE'), label = GetPhrase('command_open') } } } },
+local function showHint(cursor)
+    local subtitle, title = SX.Faction:Get().label, GetPhrase('command_hint_title')
+    local keys = { { key = key(Config.Command.toggle, 'SPACE'), label = GetPhrase('command_open') } }
+    local shown = HelpUI.ShowThisFrame('command_hint', 'command_hint', {
+        header = { subtitle = subtitle, title = title },
+        rows = { { type = 'keys', keys = keys } },
         position = 'top-left',
         offset = { x = 2.5, y = 16.0 },
         pauseMenu = true,
         hide = { pauseMenu = false },
     }, 'hint')
+    if shown or not Config.Display.mapHint then
+        Atlas.HideHint()
+        return
+    end
+    Atlas.Hint(cursor.x, cursor.y, subtitle, title, keys, SX.Faction:Get().color)
 end
 
 local function drawPreview(cursor)
@@ -227,14 +256,19 @@ function SX.Command:Initialize()
                         if pressed(Config.Command.undo) then undo() end
 
                         drawPreview(cursor)
-                        showCard()
+                        showCard(cursor)
                     else
-                        showHint()
+                        showHint(cursor)
                     end
+                else
+                    Atlas.HideHint()
                 end
-            elseif active then
-                active = false
-                reset()
+            else
+                Atlas.HideHint()
+                if active then
+                    active = false
+                    reset()
+                end
             end
 
             Wait(wait)

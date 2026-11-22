@@ -78,4 +78,6 @@ Config.Display = {
     command = 'tactical',
     pauseScale = 8.0,
     scaleCommand = 'tacticalscale',
+    -- without sxHelpMenu, the command mode help is drawn next to the pause map cursor
+    mapHint = true,
 }
