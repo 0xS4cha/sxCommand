@@ -21,7 +21,7 @@ Real time tactical command for **ESX, QBCore, Qbox or standalone** FiveM servers
 - **Commander tools**: a command mode on the pause map with a live preview of the shape under the cursor, a perimeter that closes when clicking near its first point and undo.
 - **Overlay engine**: the engine of the `.gfx` can be used by other resources through the `Atlas` client export.
 - **sxHelpMenu** (optional): order cards and the command mode card, which stays visible in the pause menu (sxHelpMenu 1.4.0 or newer).
-- **Without sxHelpMenu**: the command mode help (tool, squad, plan and keys) is drawn by the overlay next to the pause map cursor, and the order cards fall back to notifications.
+- **Without sxHelpMenu**: the command mode help (tool, squad, plan and keys) is drawn by the overlay in the top left corner of the pause map, and the order cards fall back to notifications.
 - **Translations**: English and French.
 
 ## Dependencies
@@ -104,12 +104,15 @@ All values live in `shared/config.lua`.
 | `Config.RateLimit` | Server side limits per player: `limit` calls per `window` seconds for each action (orders, pings, shots, callsign and plan commands). Past `strikes` blocked calls within `strikeReset` seconds the player is logged, and kicked when `punishment` is `'kick'` |
 | `Config.Display.command` | Command that toggles the display |
 | `Config.Display.pauseScale` | How much larger the game draws the overlay on the pause map than on the minimap, lines and icons are divided by it there. A value set with the calibration command replaces it for that player |
-| `Config.Display.mapHint` | Draws the command mode help next to the pause map cursor when sxHelpMenu is not running |
+| `Config.Display.mapHint` | Draws the command mode help on the pause map when sxHelpMenu is not running |
+| `Config.Display.hintAnchor` | Screen position of that help (0 to 1 from the top left corner), `false` to draw it next to the cursor |
 | `Config.Display.scaleCommand` | Command that changes `pauseScale` live to calibrate it, the value is printed in the F8 console |
 
 ## How it works
 
 `core/SX_COMMAND.gfx` is the minimap overlay of the game with an extra ActionScript 2 engine (`gfx/src/sx_engine.as`) that keeps layers of shapes, markers, pings and a heat map and animates them every frame. The Lua side sends compact commands (`SX_SHAPE_CIRCLE`, `SX_MARKER`…) and the engine interpolates between updates, so a unit update is one call per second.
+
+The overlay is drawn in map space and doesn't know where the screen corners are. To pin the help box to the screen, the client measures the meters per pixel of the pause map from the cursor movements (screen position against `GetPauseMapPointerWorldPosition`) and converts the anchor to map coordinates. Until the mouse has moved, or with a controller, the box follows the cursor.
 
 The server resolves the faction of every player, sends each faction the positions of its members every second, keeps the orders and the pings, and cools down the heat map. Only the members of a faction receive its data. Callsigns (per character) and plans (per faction) are stored in the resource KVP of the server, nothing needs a database.
 

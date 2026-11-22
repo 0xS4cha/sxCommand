@@ -94,4 +94,5 @@ Config.Display = {
     pauseScale = 8.0,
     scaleCommand = 'tacticalscale',
     mapHint = true,
+    hintAnchor = { x = 0.03, y = 0.2 },
 }

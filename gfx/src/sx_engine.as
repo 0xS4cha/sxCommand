@@ -632,7 +632,7 @@
       mc.endFill();
    }
 
-   function SX_HINT(x, y, subtitle, title, keys, accent)
+   function SX_HINT(x, y, subtitle, title, keys, accent, gap)
    {
       this.SX_INIT();
       if(this.sxHint == undefined)
@@ -655,6 +655,9 @@
          hint.sig = sig;
          this.sxDrawHint(hint,subtitle,title,keys,accent);
       }
+      var offset = gap == undefined ? 16 : gap;
+      hint.box._x = offset;
+      hint.box._y = offset;
    }
 
    function SX_HINT_HIDE()
