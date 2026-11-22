@@ -20,7 +20,6 @@ local function currentTool()
     return list[toolIndex]
 end
 
--- Squad that receives the next order, nil for the whole faction
 local function targets()
     local list = { false }
     if Config.Squads.enabled then
@@ -97,7 +96,6 @@ local function showCard(cursor)
         return
     end
 
-    -- without sxHelpMenu, the same information is drawn next to the map cursor
     local subtitle = SX.Faction:Get().label
     if plan then subtitle = subtitle .. ' · ' .. GetPhrase('plan_label') .. ' : ' .. plan end
     local title = GetPhrase('order_' .. tool)

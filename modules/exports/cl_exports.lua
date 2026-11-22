@@ -14,7 +14,6 @@ exports('Ping', function(coords)
     SX.Intel:SendPing(coords)
 end)
 
--- Draw on the tactical overlay from another resource, layers: heat, zones, orders, preview, pings, trails, markers
 exports('Atlas', function()
     return {
         circle = Atlas.Circle,

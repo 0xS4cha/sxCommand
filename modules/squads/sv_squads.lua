@@ -19,7 +19,6 @@ function SX.Squads:Normalize(value)
     return value
 end
 
--- ADAM-12 and ADAM12 are in the ADAM squad, a callsign without letters has no squad
 function SX.Squads:SquadOf(callsign)
     if type(callsign) ~= 'string' then return nil end
     return callsign:match('^(%a+)')
@@ -40,7 +39,6 @@ function SX.Squads:GetSquad(source)
     return self:SquadOf(callsigns[source])
 end
 
--- Loads the saved callsign, again when the player switches to another character
 function SX.Squads:Load(source)
     if not Config.Squads.enabled then return end
     local identifier = Bridge.GetIdentifier(source)

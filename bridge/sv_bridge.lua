@@ -47,7 +47,6 @@ local function esxPlayer(source)
     return ESX and ESX.GetPlayerFromId(source) or nil
 end
 
--- PlayerData of a QBCore or Qbox player
 local function qbData(source)
     if Bridge.Name == 'qbx' then
         local ok, player = pcall(function() return exports.qbx_core:GetPlayer(source) end)
@@ -64,7 +63,6 @@ local function license(source)
     return GetPlayerIdentifierByType(source, 'license2') or GetPlayerIdentifierByType(source, 'license')
 end
 
--- Stable identifier of the character, used to keep callsigns between sessions
 function Bridge.GetIdentifier(source)
     local xPlayer = esxPlayer(source)
     if xPlayer and xPlayer.identifier then return xPlayer.identifier end
@@ -87,7 +85,6 @@ function Bridge.GetName(source)
     return GetPlayerName(source) or ('#' .. tostring(source))
 end
 
--- Returns the job name and grade, or nil when the player has no job or is off duty
 function Bridge.GetJob(source)
     local xPlayer = esxPlayer(source)
     if xPlayer then
@@ -107,7 +104,6 @@ function Bridge.GetJob(source)
     return nil, 0
 end
 
--- Calls refresh(source) whenever the framework reports a job or duty change
 function Bridge.OnJobChange(refresh)
     AddEventHandler('esx:setJob', function(source) refresh(source) end)
     AddEventHandler('QBCore:Server:OnJobUpdate', function(source) refresh(source) end)

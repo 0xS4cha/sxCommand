@@ -1,7 +1,6 @@
 SX.Plans = {}
 SX.Modules:Register('Plans', 12)
 
--- source -> { factionId, key, name, orders }
 local editing = {}
 local nextDraft = 0
 
@@ -36,7 +35,6 @@ local function normalizeName(value)
     return value, value:lower()
 end
 
--- Strips a list of orders down to what a plan keeps
 local function entries(list)
     local out = {}
     for _, order in ipairs(list) do
@@ -118,7 +116,6 @@ function SX.Plans:Delete(factionId, name)
     return true
 end
 
--- Replaces the live orders of the faction with the plan, returns the number of orders or nil
 function SX.Plans:Deploy(factionId, name, source)
     local _, key = normalizeName(name)
     local plan = key and readPlans(factionId)[key]
