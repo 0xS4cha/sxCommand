@@ -17,7 +17,6 @@ function SX.Squads:MySquad()
     return self:SquadOf(mine)
 end
 
--- Squads seen in the last unit update, the local one included
 function SX.Squads:Update(units)
     known = {}
     local own = self:MySquad()

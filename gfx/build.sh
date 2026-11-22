@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Rebuilds core/SX_COMMAND.gfx from the base minimap overlay and gfx/src/sx_engine.as.
-# usage: FFDEC=/path/to/ffdec-cli.jar ./gfx/build.sh
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 ffdec="${FFDEC:?set FFDEC to the path of JPEXS ffdec-cli.jar}"
@@ -13,8 +11,6 @@ mkdir -p "$work/build/frame_1"
 python3 - "$work/base/scripts" "$root/gfx/src/sx_engine.as" "$work/build" "$class" <<'PY'
 import sys
 base, engine, out, cls = sys.argv[1:]
-# the class gets its own name: AS2 classes are global to the minimap player, so a stock
-# MINIMAP_LOADER loaded first by another resource would otherwise hide the engine methods
 source = open(f'{base}/{cls}').read().rstrip()
 assert source.endswith('}'), 'unexpected class layout'
 source = source[:-1].rstrip() + '\n\n' + open(engine).read() + '}\n'

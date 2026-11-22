@@ -11,7 +11,6 @@ COLORS = {
     heat = 0xFF5A4F,
 }
 
--- dim: the order is for another squad, it is drawn faded and without animation
 function SX.Orders:Draw(layer, id, kind, points, dim)
     local p = points[1]
     local fade = dim and 0.35 or 1.0
@@ -31,7 +30,6 @@ function SX.Orders:Draw(layer, id, kind, points, dim)
     end
 end
 
--- An order for a squad is faded for the members of the other squads, commanders see every order
 local function forOthers(order)
     if not order.squad or SX.Faction:IsCommander() then return false end
     return SX.Squads:MySquad() ~= order.squad
@@ -53,7 +51,6 @@ function SX.Orders:Initialize()
         SX.Orders:Render(list)
     end)
 
-    -- the faded orders depend on the squad of the player
     RegisterNetEvent('sxCommand:callsign', function()
         if SX.Faction:Get() then SX.Orders:Render(last) end
     end)

@@ -632,8 +632,6 @@
       mc.endFill();
    }
 
-   // Help box that follows the pause map cursor, used when sxHelpMenu is not running.
-   // keys: "ENTER|Place;DEL|Undo", accent: color of the side bar
    function SX_HINT(x, y, subtitle, title, keys, accent)
    {
       this.SX_INIT();

@@ -16,7 +16,6 @@ end
 local view = 1.0
 local defaultPauseScale = Config.Display.pauseScale
 
--- The scale set with the calibration command is kept on this computer
 local savedScale = GetResourceKvpFloat('pauseScale')
 if savedScale and savedScale > 0.0 then
     Config.Display.pauseScale = savedScale
@@ -83,7 +82,6 @@ local function points(list)
     return table.concat(parts, '|')
 end
 
--- style: 0 solid, 1 soft gradient, 2 hatched. flags: 1 pulse, 2 dashed border, 4 flowing (arrows)
 function Atlas.Circle(layer, id, x, y, radius, color, alpha, style, border, flags)
     Atlas.Call('SX_SHAPE_CIRCLE', layer, tostring(id), x + 0.0, -y + 0.0, radius + 0.0, color, alpha, style or 0, border or 2, flags or 0)
 end
@@ -104,12 +102,10 @@ function Atlas.ClearLayer(layer)
     Atlas.Call('SX_LAYER_CLEAR', layer)
 end
 
--- flags: 1 injured, 2 firing, 4 commander. heading in GTA degrees.
 function Atlas.Marker(id, x, y, heading, color, flags, duration)
     Atlas.Call('SX_MARKER', tostring(id), x + 0.0, -y + 0.0, -(heading or 0.0) + 0.0, color, flags or 0, (duration or 1.0) + 0.0)
 end
 
--- Text drawn next to a unit (its callsign), an empty string removes it
 function Atlas.MarkerLabel(id, text)
     Atlas.Call('SX_MARKER_LABEL', tostring(id), text or '')
 end
@@ -130,7 +126,6 @@ function Atlas.Heat(cell, list, color)
     Atlas.Call('SX_HEAT', cell + 0.0, table.concat(parts, '|'), color)
 end
 
--- Help box that follows the pause map cursor. keys: { { key = 'ENTER', label = 'Place' }, ... }
 local hintShown = false
 
 function Atlas.Hint(x, y, subtitle, title, keys, accent)

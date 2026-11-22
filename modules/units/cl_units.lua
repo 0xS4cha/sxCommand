@@ -42,7 +42,6 @@ function SX.Units:Initialize()
     end)
 
     RegisterNetEvent('sxCommand:faction', function(faction)
-        -- the overlay may have been cleared, labels are sent again with the next update
         labels = {}
         if faction then return end
         for id in pairs(shown) do Atlas.RemoveMarker(id) end

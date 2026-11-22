@@ -1,10 +1,7 @@
 Config = {}
 
--- 'auto', 'esx', 'qb' (qb-core), 'qbx' (qbx_core) or 'standalone'
 Config.Framework = 'auto'
 
--- ESX, QBCore or Qbox jobs that form a faction. commandGrade: minimum grade to give orders.
--- Without a framework, the ACE permissions below give the police faction and the commander role.
 Config.Factions = {
     jobs = {
         police = { label = 'LSPD', color = 0x3EE6FF, commandGrade = 3 },
@@ -13,7 +10,6 @@ Config.Factions = {
     },
     ace = { member = 'sxcommand.police', commander = 'sxcommand.commander', job = 'police' },
     sxIllegalsGroups = true,
-    -- QBCore and Qbox: only players on duty are part of their job faction
     requireDuty = true,
     refresh = 15,
 }
@@ -24,13 +20,11 @@ Config.Units = {
     firingSeconds = 1.5,
 }
 
--- Callsigns: /callsign ADAM-12 puts the player in the ADAM squad (the letters before the first dash or digit).
--- Commanders can give an order to a single squad, and set the callsign of a member with /callsign <id> <callsign>.
 Config.Squads = {
     enabled = true,
     command = 'callsign',
     maxLength = 10,
-    labels = true, -- show the callsigns next to the units on the map
+    labels = true,
 }
 
 Config.Orders = {
@@ -55,18 +49,16 @@ Config.Heat = {
     interval = 5,
 }
 
--- Frontend controls read in the pause map while the command mode is on
 Config.Command = {
     toggle = 203,
     previous = 205,
     next = 206,
     place = 201,
     undo = 214,
-    target = 204, -- cycles the squad that receives the next order (TAB)
+    target = 204,
     closeDistance = 30.0,
 }
 
--- Saved operations: commanders prepare orders in private and deploy them later
 Config.Plans = {
     enabled = true,
     command = 'tacticalplan',
@@ -78,6 +70,5 @@ Config.Display = {
     command = 'tactical',
     pauseScale = 8.0,
     scaleCommand = 'tacticalscale',
-    -- without sxHelpMenu, the command mode help is drawn next to the pause map cursor
     mapHint = true,
 }

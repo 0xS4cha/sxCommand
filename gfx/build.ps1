@@ -1,5 +1,3 @@
-# Rebuilds core/SX_COMMAND.gfx from the base minimap overlay and gfx/src/sx_engine.as.
-# usage: .\gfx\build.ps1 -FFDec C:\path\to\ffdec-cli.jar   (or set $env:FFDEC)
 param(
     [string]$FFDec = $env:FFDEC
 )
@@ -37,8 +35,6 @@ try {
     $text = $text.Substring(0, $text.Length - 1).TrimEnd()
     $merged = $text + "`n`n" + [IO.File]::ReadAllText($engine, $utf8) + "}`n"
 
-    # the class gets its own name: AS2 classes are global to the minimap player, so a stock
-    # MINIMAP_LOADER loaded first by another resource would otherwise hide the engine methods
     $renames = @(
         @('class com.rockstargames.gtav.levelDesign.MINIMAP_LOADER ', 'class com.rockstargames.gtav.levelDesign.SX_COMMAND_LOADER '),
         @('function MINIMAP_LOADER(', 'function SX_COMMAND_LOADER(')

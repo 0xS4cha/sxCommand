@@ -13,7 +13,6 @@ local function framework()
     return 'standalone'
 end
 
--- GTA color codes (~b~, ~s~...) only render in the native feed
 local function plain(message)
     return (message:gsub('~%a~', ''))
 end

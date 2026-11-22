@@ -3,7 +3,6 @@ SX.Modules:Register('Plans', 12)
 
 local editing = nil
 
--- Name of the plan the local commander is editing, or nil
 function SX.Plans:Editing()
     return editing
 end

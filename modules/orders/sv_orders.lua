@@ -22,7 +22,6 @@ local function sanitizePoints(points, min, max)
     return out
 end
 
--- Checks an order and returns { kind, points, squad } or nil
 function SX.Orders:Build(kind, points, squad)
     local shape = TYPES[kind]
     if not shape then return nil end
@@ -42,7 +41,6 @@ function SX.Orders:List(factionId)
     return list
 end
 
--- A commander editing a plan sees the plan instead of the live orders
 function SX.Orders:SendTo(source)
     if SX.Plans:IsEditing(source) then
         SX.Plans:SendDraft(source)
@@ -76,7 +74,6 @@ local function newOrder(entry, author, authorId)
     }
 end
 
--- Members who receive the card of an order: its squad, or everyone when it has none
 local function concerned(member, squad)
     if not squad then return true end
     return SX.Squads:GetSquad(member) == squad or (SX.Factions:Get(member) or {}).commander == true
@@ -110,7 +107,6 @@ function SX.Orders:Create(source, kind, points, squad)
     return true
 end
 
--- Replaces the orders of a faction, used to deploy a saved plan
 function SX.Orders:Replace(factionId, entries, author, authorId)
     local list = {}
     for _, entry in ipairs(entries) do
