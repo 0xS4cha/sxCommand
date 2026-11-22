@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 name 'sxCommand'
-description 'Real time tactical command on the minimap: squad positions, orders, intel pings and a gunfire heat map, ESX or standalone'
+description 'Real time tactical command on the minimap: squad positions, orders, intel pings and a gunfire heat map, ESX, QBCore, Qbox or standalone'
 author '0xS4cha'
 version '1.1.0'
 repository 'https://github.com/0xS4cha/sxCommand'
