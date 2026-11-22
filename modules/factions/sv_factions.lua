@@ -63,8 +63,13 @@ function SX.Factions:Refresh(source)
         return
     end
     local faction = self:Resolve(source)
+    if faction then SX.Squads:Load(source) end
     if same(faction, membership[source]) then return end
+    local previous = membership[source]
     membership[source] = faction
+    if previous and (not faction or faction.id ~= previous.id or not faction.commander) then
+        SX.Plans:Stop(source)
+    end
     TriggerClientEvent('sxCommand:faction', source, faction)
     if faction then SX.Orders:SendTo(source) end
 end
@@ -81,7 +86,7 @@ local function registerPermission()
 end
 
 function SX.Factions:Initialize()
-    AddEventHandler('esx:setJob', function(source)
+    Bridge.OnJobChange(function(source)
         SX.Factions:Refresh(source)
     end)
 

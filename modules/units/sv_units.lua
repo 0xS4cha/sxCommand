@@ -18,7 +18,7 @@ function SX.Units:Tick()
                 if health < Config.Units.injuredHealth then flags = flags | 1 end
                 if firing[source] and firing[source] > now then flags = flags | 2 end
                 if faction and faction.commander then flags = flags | 4 end
-                units[#units + 1] = { id = source, x = coords.x, y = coords.y, h = GetEntityHeading(ped), f = flags }
+                units[#units + 1] = { id = source, x = coords.x, y = coords.y, h = GetEntityHeading(ped), f = flags, c = SX.Squads:Get(source) }
             end
         end
         for _, source in ipairs(members) do

@@ -109,6 +109,11 @@ function Atlas.Marker(id, x, y, heading, color, flags, duration)
     Atlas.Call('SX_MARKER', tostring(id), x + 0.0, -y + 0.0, -(heading or 0.0) + 0.0, color, flags or 0, (duration or 1.0) + 0.0)
 end
 
+-- Text drawn next to a unit (its callsign), an empty string removes it
+function Atlas.MarkerLabel(id, text)
+    Atlas.Call('SX_MARKER_LABEL', tostring(id), text or '')
+end
+
 function Atlas.RemoveMarker(id)
     Atlas.Call('SX_MARKER_REMOVE', tostring(id))
 end
