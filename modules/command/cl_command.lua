@@ -62,6 +62,53 @@ local function key(name)
     return KEY_NAMES[bind.defaultKey] or bind.defaultKey
 end
 
+local scale = { samples = {}, last = nil, value = nil }
+
+local function resetScale()
+    scale.samples = {}
+    scale.last = nil
+    scale.value = nil
+end
+
+local function median(list)
+    local sorted = {}
+    for i, v in ipairs(list) do sorted[i] = v end
+    table.sort(sorted)
+    return sorted[math.ceil(#sorted / 2)]
+end
+
+local function measureScale(cursor, sx, sy, width, height)
+    local last = scale.last
+    scale.last = { sx = sx, sy = sy, x = cursor.x, y = cursor.y }
+    if not last then return end
+
+    local dx, dy = (sx - last.sx) * width, (sy - last.sy) * height
+    local pixels = math.sqrt(dx * dx + dy * dy)
+    if pixels < 3 then return end
+
+    local wx, wy = cursor.x - last.x, cursor.y - last.y
+    local meters = math.sqrt(wx * wx + wy * wy)
+    if meters < 0.05 or wx * dx < 0 or wy * dy > 0 then return end
+
+    table.insert(scale.samples, meters / pixels)
+    if #scale.samples > 9 then table.remove(scale.samples, 1) end
+    if #scale.samples >= 3 then scale.value = median(scale.samples) end
+end
+
+local function hintPoint(cursor)
+    local anchor = Config.Display.hintAnchor
+    if not anchor then return cursor.x, cursor.y, 16 end
+
+    local sx, sy = GetControlNormal(2, 239), GetControlNormal(2, 240)
+    local width, height = GetActiveScreenResolution()
+    measureScale(cursor, sx, sy, width, height)
+    if not scale.value then return cursor.x, cursor.y, 16 end
+
+    local x = cursor.x + (anchor.x - sx) * width * scale.value
+    local y = cursor.y - (anchor.y - sy) * height * scale.value
+    return x, y, 0
+end
+
 local function showCard(cursor)
     local tool = currentTool()
     local target = currentTarget()
@@ -121,7 +168,8 @@ local function showCard(cursor)
             mapKeys[i].label = ('%s : %s'):format(entry.label, target or GetPhrase('command_target_all'))
         end
     end
-    Atlas.Hint(cursor.x, cursor.y, subtitle, title, mapKeys, plan and COLORS.perimeter or SX.Faction:Get().color)
+    local x, y, gap = hintPoint(cursor)
+    Atlas.Hint(x, y, subtitle, title, mapKeys, plan and COLORS.perimeter or SX.Faction:Get().color, gap)
 end
 
 local function showHint(cursor)
@@ -139,7 +187,8 @@ local function showHint(cursor)
         Atlas.HideHint()
         return
     end
-    Atlas.Hint(cursor.x, cursor.y, subtitle, title, keys, SX.Faction:Get().color)
+    local x, y, gap = hintPoint(cursor)
+    Atlas.Hint(x, y, subtitle, title, keys, SX.Faction:Get().color, gap)
 end
 
 local function drawPreview(cursor)
@@ -304,6 +353,7 @@ function SX.Command:Initialize()
                 end
             else
                 Atlas.HideHint()
+                if scale.last then resetScale() end
                 if active then
                     active = false
                     reset()
