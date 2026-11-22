@@ -44,6 +44,8 @@ AddLanguage("fr", {
 
     notify_no_faction = "Vous ne faites partie d'aucune faction tactique.",
     notify_not_commander = "Seul un commandant peut faire ça.",
+    notify_rate_limited = "Doucement, cette action est temporairement bloquée.",
+    kick_rate_limited = "Trop de requêtes de commandement tactique.",
 
     callsign_current = "Votre indicatif : ~b~%s~s~.",
     callsign_none = "Vous n'avez pas d'indicatif, choisissez-en un avec /callsign ADAM-12.",

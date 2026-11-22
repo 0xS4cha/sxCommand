@@ -208,7 +208,7 @@ function actions.delete(source, faction, name)
 end
 
 local function command(source, args)
-    if source == 0 then return end
+    if source == 0 or not SX.RateLimit:Allow(source, 'plan') then return end
     local faction = SX.Factions:Get(source)
     if not faction or not faction.commander then
         notify(source, 'notify_not_commander')

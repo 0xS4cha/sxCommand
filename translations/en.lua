@@ -44,6 +44,8 @@ AddLanguage("en", {
 
     notify_no_faction = "You are not part of a tactical faction.",
     notify_not_commander = "Only a commander can do that.",
+    notify_rate_limited = "Slow down, this action is temporarily blocked.",
+    kick_rate_limited = "Too many tactical command requests.",
 
     callsign_current = "Your callsign: ~b~%s~s~.",
     callsign_none = "You have no callsign, set one with /callsign ADAM-12.",

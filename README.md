@@ -101,6 +101,7 @@ All values live in `shared/config.lua`.
 | `Config.Command.keys` | Default keys of the command mode (`target` cycles the squads) |
 | `Config.Command.blockedControls` | Pause map controls disabled outside (`idle`) and inside (`active`) the command mode, so the keys don't also switch tabs or set a waypoint |
 | `Config.Command.closeDistance` | Distance that closes a perimeter |
+| `Config.RateLimit` | Server side limits per player: `limit` calls per `window` seconds for each action (orders, pings, shots, callsign and plan commands). Past `strikes` blocked calls within `strikeReset` seconds the player is logged, and kicked when `punishment` is `'kick'` |
 | `Config.Display.command` | Command that toggles the display |
 | `Config.Display.pauseScale` | How much larger the game draws the overlay on the pause map than on the minimap, lines and icons are divided by it there. A value set with the calibration command replaces it for that player |
 | `Config.Display.mapHint` | Draws the command mode help next to the pause map cursor when sxHelpMenu is not running |
@@ -163,6 +164,7 @@ Only the `MINIMAP_LOADER` class is recompiled, under the name `SX_COMMAND_LOADER
 | `sxCommand:orderCreated` | `factionId`, `kind`, `points`, `source`, `squad` |
 | `sxCommand:callsignChanged` | `source`, `callsign` |
 | `sxCommand:planDeployed` | `factionId`, `name`, `source` |
+| `sxCommand:rateLimited` | `source`, `action`, `blockedCalls`, fired when a player reaches the strike threshold, to plug an anticheat or a ban system |
 | `sxCommand:pinged` | `factionId`, `ping`, `source` |
 
 ## License
