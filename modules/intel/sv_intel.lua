@@ -29,8 +29,9 @@ function SX.Intel:Ping(source, x, y, z)
     if lastPing[source] and now - lastPing[source] < Config.Pings.cooldown * 1000 then return end
     lastPing[source] = now
 
-    x, y = tonumber(x), tonumber(y)
-    if not x or not y then return end
+    x, y, z = tonumber(x), tonumber(y), tonumber(z)
+    if not x or not y or math.abs(x) > 20000 or math.abs(y) > 20000 then return end
+    if z and math.abs(z) > 5000 then z = nil end
     nextPing = nextPing + 1
     local ping = { id = nextPing, x = x + 0.0, y = y + 0.0, z = (tonumber(z) or 0.0) + 0.0, author = Bridge.GetName(source), authorId = source }
     for _, member in ipairs(SX.Factions:Members(faction.id)) do
@@ -41,6 +42,7 @@ end
 
 function SX.Intel:Initialize()
     RegisterNetEvent('sxCommand:sendPing', function(x, y, z)
+        if not SX.RateLimit:Allow(source, 'ping') then return end
         SX.Intel:Ping(source, x, y, z)
     end)
     AddEventHandler('playerDropped', function()

@@ -72,6 +72,23 @@ Config.Plans = {
     maxNameLength = 24,
 }
 
+Config.RateLimit = {
+    enabled = true,
+    actions = {
+        createOrder = { limit = 8, window = 10 },
+        undoOrder = { limit = 12, window = 10 },
+        clearOrders = { limit = 3, window = 10 },
+        ping = { limit = 5, window = 10 },
+        shot = { limit = 15, window = 10 },
+        ready = { limit = 3, window = 60 },
+        callsign = { limit = 6, window = 60 },
+        plan = { limit = 12, window = 60 },
+    },
+    strikes = 30,
+    strikeReset = 60,
+    punishment = 'log',
+}
+
 Config.Display = {
     command = 'tactical',
     pauseScale = 8.0,

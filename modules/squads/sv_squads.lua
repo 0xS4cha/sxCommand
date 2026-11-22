@@ -66,7 +66,7 @@ function SX.Squads:Set(source, callsign)
 end
 
 local function command(source, args)
-    if source == 0 then return end
+    if source == 0 or not SX.RateLimit:Allow(source, 'callsign') then return end
     local faction = SX.Factions:Get(source)
     if not faction then
         notify(source, 'notify_no_faction')

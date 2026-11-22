@@ -146,12 +146,15 @@ end
 
 function SX.Orders:Initialize()
     RegisterNetEvent('sxCommand:createOrder', function(kind, points, squad)
+        if not SX.RateLimit:Allow(source, 'createOrder') then return end
         SX.Orders:Create(source, kind, points, squad)
     end)
     RegisterNetEvent('sxCommand:undoOrder', function()
+        if not SX.RateLimit:Allow(source, 'undoOrder') then return end
         SX.Orders:Undo(source)
     end)
     RegisterNetEvent('sxCommand:clearOrders', function()
+        if not SX.RateLimit:Allow(source, 'clearOrders') then return end
         SX.Orders:Clear(source)
     end)
 end

@@ -30,6 +30,7 @@ end
 function SX.Units:Initialize()
     RegisterNetEvent('sxCommand:shot', function()
         local src = source
+        if not SX.RateLimit:Allow(src, 'shot') then return end
         local now = GetGameTimer()
         if lastShot[src] and now - lastShot[src] < 900 then return end
         lastShot[src] = now

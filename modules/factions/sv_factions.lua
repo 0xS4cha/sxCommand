@@ -92,6 +92,7 @@ function SX.Factions:Initialize()
 
     RegisterNetEvent('sxCommand:ready', function()
         local src = source
+        if not SX.RateLimit:Allow(src, 'ready') then return end
         membership[src] = nil
         SX.Factions:Refresh(src)
     end)
