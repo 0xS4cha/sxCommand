@@ -19,6 +19,7 @@ Real time tactical command for **ESX, QBCore, Qbox or standalone** FiveM servers
 - **Commander tools**: a command mode on the pause map with a live preview of the shape under the cursor, a perimeter that closes when clicking near its first point and undo.
 - **Overlay engine**: the engine of the `.gfx` can be used by other resources through the `Atlas` client export.
 - **sxHelpMenu** (optional): order cards and the command mode card, which stays visible in the pause menu (sxHelpMenu 1.4.0 or newer).
+- **Without sxHelpMenu**: the command mode help (tool, squad, plan and keys) is drawn by the overlay next to the pause map cursor, and the order cards fall back to notifications.
 - **Translations**: English and French.
 
 ## Dependencies
@@ -98,6 +99,7 @@ All values live in `shared/config.lua`.
 | `Config.Command` | Frontend controls of the command mode (`target` cycles the squads) and the distance that closes a perimeter |
 | `Config.Display.command` | Command that toggles the display |
 | `Config.Display.pauseScale` | How much larger the game draws the overlay on the pause map than on the minimap, lines and icons are divided by it there. A value set with the calibration command replaces it for that player |
+| `Config.Display.mapHint` | Draws the command mode help next to the pause map cursor when sxHelpMenu is not running |
 | `Config.Display.scaleCommand` | Command that changes `pauseScale` live to calibrate it, the value is printed in the F8 console |
 
 ## How it works

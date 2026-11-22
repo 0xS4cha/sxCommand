@@ -130,6 +130,24 @@ function Atlas.Heat(cell, list, color)
     Atlas.Call('SX_HEAT', cell + 0.0, table.concat(parts, '|'), color)
 end
 
+-- Help box that follows the pause map cursor. keys: { { key = 'ENTER', label = 'Place' }, ... }
+local hintShown = false
+
+function Atlas.Hint(x, y, subtitle, title, keys, accent)
+    local parts = {}
+    for i, entry in ipairs(keys or {}) do
+        parts[i] = (entry.key .. '|' .. entry.label):gsub(';', ',')
+    end
+    hintShown = true
+    Atlas.Call('SX_HINT', x + 0.0, -y + 0.0, subtitle or '', title or '', table.concat(parts, ';'), accent or 0x3EE6FF)
+end
+
+function Atlas.HideHint()
+    if not hintShown then return end
+    hintShown = false
+    Atlas.Call('SX_HINT_HIDE')
+end
+
 function Atlas.SetVisible(visible)
     for _, layer in ipairs(layers) do
         Atlas.Call('SX_LAYER_VISIBLE', layer, visible)

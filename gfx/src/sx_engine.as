@@ -8,6 +8,7 @@
    var sxPxPerUnit = 1;
    var sxView = 1;
    var sxUpright = 0;
+   var sxHint;
    var sxSpecs;
 
    function SX_INIT()
@@ -65,6 +66,7 @@
          this.sxPings[p].mc.removeMovieClip();
       }
       this.sxPings = new Object();
+      this.SX_HINT_HIDE();
    }
 
    function SX_LAYER_CLEAR(name)
@@ -604,6 +606,118 @@
       m.label = pivot;
    }
 
+   function sxText(parent, name, depth, text, size, color)
+   {
+      var tf = parent.createTextField(name,depth,0,0,10,10);
+      var fmt = new TextFormat();
+      fmt.font = "$Font2";
+      fmt.size = size;
+      fmt.color = color;
+      tf.embedFonts = true;
+      tf.selectable = false;
+      tf.autoSize = "left";
+      tf.setNewTextFormat(fmt);
+      tf.text = String(text).toUpperCase();
+      return tf;
+   }
+
+   function sxRect(mc, x, y, w, h, color, alpha)
+   {
+      mc.beginFill(color,alpha);
+      mc.moveTo(x,y);
+      mc.lineTo(x + w,y);
+      mc.lineTo(x + w,y + h);
+      mc.lineTo(x,y + h);
+      mc.lineTo(x,y);
+      mc.endFill();
+   }
+
+   // Help box that follows the pause map cursor, used when sxHelpMenu is not running.
+   // keys: "ENTER|Place;DEL|Undo", accent: color of the side bar
+   function SX_HINT(x, y, subtitle, title, keys, accent)
+   {
+      this.SX_INIT();
+      if(this.sxHint == undefined)
+      {
+         var layer = this.sxLayer("hint");
+         var mc = layer.createEmptyMovieClip("hint",1);
+         this.sxHint = {mc:mc,box:undefined,sig:""};
+      }
+      var hint = this.sxHint;
+      hint.mc._x = x;
+      hint.mc._y = y;
+      hint.mc._visible = true;
+      hint.mc._rotation = this.sxUpright;
+      var inv = 100 / (this.sxPxPerUnit * this.sxView);
+      hint.mc._xscale = inv;
+      hint.mc._yscale = inv;
+      var sig = subtitle + "#" + title + "#" + keys + "#" + accent;
+      if(sig != hint.sig)
+      {
+         hint.sig = sig;
+         this.sxDrawHint(hint,subtitle,title,keys,accent);
+      }
+   }
+
+   function SX_HINT_HIDE()
+   {
+      if(this.sxHint != undefined)
+      {
+         this.sxHint.mc._visible = false;
+      }
+   }
+
+   function sxDrawHint(hint, subtitle, title, keys, accent)
+   {
+      if(hint.box != undefined)
+      {
+         hint.box.removeMovieClip();
+      }
+      var box = hint.mc.createEmptyMovieClip("box",1);
+      hint.box = box;
+      var bg = box.createEmptyMovieClip("bg",1);
+      var pad = 9;
+      var sub = this.sxText(box,"sub",2,subtitle,9,0x9AA0B4);
+      var head = this.sxText(box,"head",3,title,15,0xFFFFFF);
+      sub._x = pad + 2;
+      sub._y = pad - 3;
+      head._x = pad + 2;
+      head._y = sub._y + sub.textHeight;
+      var width = Math.max(sub.textWidth,head.textWidth) + pad * 2 + 6;
+      var headerH = head._y + head.textHeight + pad - 2;
+      var rows = [];
+      var list = keys == "" ? [] : String(keys).split(";");
+      var y = headerH + 7;
+      var i = 0;
+      while(i < list.length)
+      {
+         var parts = list[i].split("|");
+         var badge = box.createEmptyMovieClip("k" + i,10 + i * 3);
+         var keyText = this.sxText(box,"kt" + i,11 + i * 3,parts[0],10,0x1B1E2E);
+         var label = this.sxText(box,"kl" + i,12 + i * 3,parts[1],11,0xFFFFFF);
+         var bw = Math.max(keyText.textWidth + 10,20);
+         var bh = keyText.textHeight + 3;
+         this.sxRect(badge,pad + 2,y,bw,bh,0xFFFFFF,100);
+         keyText._x = pad + 2 + (bw - keyText.textWidth) / 2 - 2;
+         keyText._y = y - 1;
+         label._x = pad + 2 + bw + 7;
+         label._y = y + (bh - label.textHeight) / 2 - 1;
+         width = Math.max(width,label._x + label.textWidth + pad + 2);
+         y += bh + 5;
+         i += 1;
+      }
+      var height = list.length > 0 ? y + pad - 5 : headerH;
+      this.sxRect(bg,0,0,width,headerH,0x1B1E2E,100);
+      if(list.length > 0)
+      {
+         this.sxRect(bg,0,headerH,width,height - headerH,0x3A3F52,100);
+         this.sxRect(bg,0,headerH,width,1,0xFFFFFF,25);
+      }
+      this.sxRect(bg,0,0,3,height,accent,100);
+      box._x = 16;
+      box._y = 16;
+   }
+
    function SX_MARKER_REMOVE(id)
    {
       var m = this.sxMarkers[id];
@@ -718,6 +832,13 @@
             m.halo.lineStyle(this.sxW(3),0xFFC94D,100 - since / 4.5,true,"none");
             this.sxCirclePath(m.halo,0,0,9 + since / 18);
          }
+      }
+
+      if(this.sxHint != undefined && this.sxHint.mc._visible)
+      {
+         this.sxHint.mc._rotation = upright;
+         this.sxHint.mc._xscale = inv;
+         this.sxHint.mc._yscale = inv;
       }
 
       for(var key in this.sxPulse)
