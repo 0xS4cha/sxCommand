@@ -5,7 +5,9 @@ Real time tactical command for **ESX, QBCore, Qbox or standalone** FiveM servers
 ![sxCommand](previews/image.png)
 ![Overlay](previews/image2.png)
 
-*The overlay engine rendering a rally point, a perimeter, a hatched danger zone, an assault axis, units with trails, pings and the gunfire heat map (preview rendered outside the game).*
+*An operation plan on the pause map: the ADAM and LINCOLN squads move along their assault axes from the rally point, the perimeter and the objective surround the warehouse, a hatched danger zone covers the sniper, intel pings and the gunfire heat map show the enemies, the MARY order is faded for the other squads, and the commander places a new danger zone with the cursor help (preview rendered outside the game).*
+
+![Operation](previews/operation.gif)
 
 ## Features
 
