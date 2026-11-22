@@ -77,7 +77,7 @@ The server should run OneSync, the units are read from the server side player po
 
 `/tacticalplan save <name>` outside the editing mode saves the live orders as a plan. Editing an existing plan loads its orders first.
 
-The pause map keys are frontend controls (`Config.Command`), the ping key can be changed in *Settings > Key Bindings > FiveM*. A member who is not a commander only has the mark tool in the command mode.
+Every key is a FiveM key mapping: players can change them in *Settings > Key Bindings > FiveM*, and `Config.Command.keys` and `Config.Pings.key` set the defaults. A member who is not a commander only has the mark tool in the command mode.
 
 ## Configuration
 
@@ -98,7 +98,9 @@ All values live in `shared/config.lua`.
 | `Config.Orders.radius` | Radius of the rally point, danger zone and objective |
 | `Config.Pings` | Lifetime, cooldown, aim distance and key of the marks |
 | `Config.Heat` | Cell size, heat per shot, cooling and update interval of the heat map |
-| `Config.Command` | Frontend controls of the command mode (`target` cycles the squads) and the distance that closes a perimeter |
+| `Config.Command.keys` | Default keys of the command mode (`target` cycles the squads) |
+| `Config.Command.blockedControls` | Pause map controls disabled outside (`idle`) and inside (`active`) the command mode, so the keys don't also switch tabs or set a waypoint |
+| `Config.Command.closeDistance` | Distance that closes a perimeter |
 | `Config.Display.command` | Command that toggles the display |
 | `Config.Display.pauseScale` | How much larger the game draws the overlay on the pause map than on the minimap, lines and icons are divided by it there. A value set with the calibration command replaces it for that player |
 | `Config.Display.mapHint` | Draws the command mode help next to the pause map cursor when sxHelpMenu is not running |

@@ -1,5 +1,11 @@
 AddLanguage("en", {
     keymap_ping = "Command: mark the aimed spot for your team",
+    keymap_toggle = "Command: enter or leave the command mode (pause map)",
+    keymap_previous = "Command: previous tool (pause map)",
+    keymap_next = "Command: next tool (pause map)",
+    keymap_target = "Command: squad that receives the next order (pause map)",
+    keymap_place = "Command: place the order or point (pause map)",
+    keymap_undo = "Command: remove the last point or order (pause map)",
 
     notify_joined = "Tactical link: ~b~%s~s~.",
     notify_joined_commander = "Tactical link: ~b~%s~s~, you can give orders from the pause map.",

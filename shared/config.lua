@@ -50,12 +50,18 @@ Config.Heat = {
 }
 
 Config.Command = {
-    toggle = 203,
-    previous = 205,
-    next = 206,
-    place = 201,
-    undo = 214,
-    target = 204,
+    keys = {
+        toggle = 'SPACE',
+        previous = 'Q',
+        next = 'E',
+        place = 'RETURN',
+        undo = 'DELETE',
+        target = 'TAB',
+    },
+    blockedControls = {
+        idle = { 203 },
+        active = { 201, 203, 204, 205, 206, 214 },
+    },
     closeDistance = 30.0,
 }
 

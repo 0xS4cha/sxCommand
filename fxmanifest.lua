@@ -22,6 +22,7 @@ shared_scripts {
 }
 
 client_scripts {
+    'core/cl_keys.lua',
     'bridge/cl_bridge.lua',
     'modules/**/cl_*.lua',
     'core/sh_init.lua',
