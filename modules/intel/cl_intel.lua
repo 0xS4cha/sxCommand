@@ -31,11 +31,12 @@ function SX.Intel:Initialize()
         Atlas.Heat(Config.Heat.cell, cells, COLORS.heat)
     end)
 
-    RegisterCommand('+sxcommand_ping', function()
-        SX.Intel:SendPing(aimedPoint())
-    end, false)
-    RegisterCommand('-sxcommand_ping', function() end, false)
-    if Config.Pings.key and Config.Pings.key ~= '' then
-        RegisterKeyMapping('+sxcommand_ping', GetPhrase('keymap_ping'), 'keyboard', Config.Pings.key)
-    end
+    Keys.Register({
+        name = 'sxcommand_ping',
+        description = 'keymap_ping',
+        defaultKey = Config.Pings.key or '',
+        onPressed = function()
+            SX.Intel:SendPing(aimedPoint())
+        end,
+    })
 end

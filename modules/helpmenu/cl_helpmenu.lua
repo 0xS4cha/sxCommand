@@ -63,14 +63,6 @@ function HelpUI.Hide(name)
     call('Hide', HelpUI.Id(name))
 end
 
-function HelpUI.KeyLabel(control, fallback)
-    local button = GetControlInstructionalButton(0, control, true)
-    if type(button) == 'string' and button:sub(1, 2) == 't_' then
-        return button:sub(3)
-    end
-    return fallback
-end
-
 function HelpUI.Color(rgb)
     if type(rgb) ~= 'table' then return nil end
     return ('#%02x%02x%02x'):format(rgb.r or 255, rgb.g or 255, rgb.b or 255)

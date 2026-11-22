@@ -9,6 +9,10 @@ local toolIndex = 1
 local targetIndex = 1
 local draft = {}
 local lastPreview = nil
+local cursorNow = nil
+local binds = {}
+
+local KEY_NAMES = { RETURN = 'ENTER', DELETE = 'DEL', SPACE = 'SPACE', TAB = 'TAB' }
 
 local function tools()
     return SX.Faction:IsCommander() and COMMANDER_TOOLS or MEMBER_TOOLS
@@ -48,8 +52,14 @@ local function reset()
     clearPreview()
 end
 
-local function key(control, fallback)
-    return HelpUI.KeyLabel(control, fallback)
+local function key(name)
+    local bind = binds[name]
+    if not bind then return '?' end
+    local button = GetControlInstructionalButton(0, bind.hash, true)
+    if type(button) == 'string' and button:sub(1, 2) == 't_' then
+        return button:sub(3)
+    end
+    return KEY_NAMES[bind.defaultKey] or bind.defaultKey
 end
 
 local function showCard(cursor)
@@ -71,15 +81,15 @@ local function showCard(cursor)
     end
 
     local keys = {
-        { key = key(Config.Command.place, 'ENTER'), label = GetPhrase('command_place') },
-        { key = key(Config.Command.undo, 'DEL'), label = GetPhrase('command_undo') },
-        { key = key(Config.Command.toggle, 'SPACE'), label = GetPhrase('command_exit') },
+        { key = key('place'), label = GetPhrase('command_place') },
+        { key = key('undo'), label = GetPhrase('command_undo') },
+        { key = key('toggle'), label = GetPhrase('command_exit') },
     }
     if canTarget() then
-        table.insert(keys, 1, { key = key(Config.Command.target, 'TAB'), label = GetPhrase('command_target') })
+        table.insert(keys, 1, { key = key('target'), label = GetPhrase('command_target') })
     end
     if #tools() > 1 then
-        table.insert(keys, 1, { key = key(Config.Command.previous, 'Q') .. '/' .. key(Config.Command.next, 'E'), label = GetPhrase('command_switch') })
+        table.insert(keys, 1, { key = key('previous') .. '/' .. key('next'), label = GetPhrase('command_switch') })
     end
     rows[#rows + 1] = { type = 'keys', keys = keys }
 
@@ -116,7 +126,7 @@ end
 
 local function showHint(cursor)
     local subtitle, title = SX.Faction:Get().label, GetPhrase('command_hint_title')
-    local keys = { { key = key(Config.Command.toggle, 'SPACE'), label = GetPhrase('command_open') } }
+    local keys = { { key = key('toggle'), label = GetPhrase('command_open') } }
     local shown = HelpUI.ShowThisFrame('command_hint', 'command_hint', {
         header = { subtitle = subtitle, title = title },
         rows = { { type = 'keys', keys = keys } },
@@ -216,43 +226,74 @@ local function undo()
     end
 end
 
-local function pressed(control)
-    DisableControlAction(2, control, true)
-    return IsDisabledControlJustPressed(2, control)
+local actions = {
+    toggle = function()
+        active = not active
+        reset()
+    end,
+    previous = function()
+        if not active then return end
+        toolIndex = toolIndex - 1
+        if toolIndex < 1 then toolIndex = #tools() end
+        reset()
+    end,
+    next = function()
+        if not active then return end
+        toolIndex = toolIndex % #tools() + 1
+        reset()
+    end,
+    target = function()
+        if active and canTarget() then
+            targetIndex = targetIndex % #targets() + 1
+        end
+    end,
+    place = function()
+        if active then place(cursorNow) end
+    end,
+    undo = function()
+        if active then undo() end
+    end,
+}
+
+local function registerKeys()
+    for _, name in ipairs({ 'toggle', 'previous', 'next', 'target', 'place', 'undo' }) do
+        binds[name] = Keys.Register({
+            name = 'sxcommand_' .. name,
+            description = 'keymap_' .. name,
+            defaultKey = Config.Command.keys[name],
+            pauseMenu = true,
+            onPressed = function()
+                if cursorNow and SX.Faction:Get() and IsPauseMenuActive() then
+                    actions[name]()
+                end
+            end,
+        })
+    end
+end
+
+local function blockControls()
+    for _, control in ipairs(Config.Command.blockedControls[active and 'active' or 'idle']) do
+        DisableControlAction(2, control, true)
+    end
 end
 
 function SX.Command:Initialize()
+    registerKeys()
+
     CreateThread(function()
         while true do
             local wait = 500
             local faction = SX.Faction:Get()
+            cursorNow = nil
 
             if faction and IsPauseMenuActive() then
                 local cursor = GetPauseMapPointerWorldPosition()
                 if cursor then
                     wait = 0
-                    if pressed(Config.Command.toggle) then
-                        active = not active
-                        reset()
-                    end
+                    cursorNow = cursor
+                    blockControls()
 
                     if active then
-                        if pressed(Config.Command.previous) then
-                            toolIndex = toolIndex - 1
-                            if toolIndex < 1 then toolIndex = #tools() end
-                            reset()
-                        elseif pressed(Config.Command.next) then
-                            toolIndex = toolIndex % #tools() + 1
-                            reset()
-                        end
-
-                        if pressed(Config.Command.target) and canTarget() then
-                            targetIndex = targetIndex % #targets() + 1
-                        end
-
-                        if pressed(Config.Command.place) then place(cursor) end
-                        if pressed(Config.Command.undo) then undo() end
-
                         drawPreview(cursor)
                         showCard(cursor)
                     else

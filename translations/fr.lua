@@ -1,5 +1,11 @@
 AddLanguage("fr", {
     keymap_ping = "Commandement : marquer l'endroit visé pour l'équipe",
+    keymap_toggle = "Commandement : entrer ou sortir du mode commande (carte)",
+    keymap_previous = "Commandement : outil précédent (carte)",
+    keymap_next = "Commandement : outil suivant (carte)",
+    keymap_target = "Commandement : escouade qui reçoit le prochain ordre (carte)",
+    keymap_place = "Commandement : poser l'ordre ou le point (carte)",
+    keymap_undo = "Commandement : retirer le dernier point ou ordre (carte)",
 
     notify_joined = "Liaison tactique : ~b~%s~s~.",
     notify_joined_commander = "Liaison tactique : ~b~%s~s~, vous pouvez donner des ordres depuis la carte.",
