@@ -2,6 +2,7 @@ SX.Units = {}
 SX.Modules:Register('Units', 20)
 
 local shown = {}
+local labels = {}
 
 function SX.Units:Render(units)
     local faction = SX.Faction:Get()
@@ -9,6 +10,8 @@ function SX.Units:Render(units)
     local me = GetPlayerServerId(PlayerId())
     local seen = {}
     local duration = Config.Units.interval / 1000
+    local showLabels = Config.Squads.enabled and Config.Squads.labels
+    SX.Squads:Update(units)
 
     for _, unit in ipairs(units or {}) do
         if unit.id ~= me then
@@ -16,6 +19,11 @@ function SX.Units:Render(units)
             seen[id] = true
             shown[id] = true
             Atlas.Marker(id, unit.x, unit.y, unit.h, faction.color, unit.f, duration)
+            local label = showLabels and unit.c or ''
+            if labels[id] ~= label then
+                labels[id] = label
+                Atlas.MarkerLabel(id, label)
+            end
         end
     end
 
@@ -23,6 +31,7 @@ function SX.Units:Render(units)
         if not seen[id] then
             Atlas.RemoveMarker(id)
             shown[id] = nil
+            labels[id] = nil
         end
     end
 end
@@ -33,6 +42,8 @@ function SX.Units:Initialize()
     end)
 
     RegisterNetEvent('sxCommand:faction', function(faction)
+        -- the overlay may have been cleared, labels are sent again with the next update
+        labels = {}
         if faction then return end
         for id in pairs(shown) do Atlas.RemoveMarker(id) end
         shown = {}

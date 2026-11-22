@@ -6,6 +6,7 @@ local MEMBER_TOOLS = { 'ping' }
 
 local active = false
 local toolIndex = 1
+local targetIndex = 1
 local draft = {}
 local lastPreview = nil
 
@@ -17,6 +18,25 @@ local function currentTool()
     local list = tools()
     if toolIndex > #list then toolIndex = 1 end
     return list[toolIndex]
+end
+
+-- Squad that receives the next order, nil for the whole faction
+local function targets()
+    local list = { false }
+    if Config.Squads.enabled then
+        for _, squad in ipairs(SX.Squads:List()) do list[#list + 1] = squad end
+    end
+    return list
+end
+
+local function currentTarget()
+    local list = targets()
+    if targetIndex > #list then targetIndex = 1 end
+    return list[targetIndex] or nil
+end
+
+local function canTarget()
+    return SX.Faction:IsCommander() and currentTool() ~= 'ping' and #targets() > 1
 end
 
 local function clearPreview()
@@ -35,9 +55,16 @@ end
 
 local function showCard()
     local tool = currentTool()
-    local rows = {
-        { type = 'text', label = GetPhrase('command_tool'), value = GetPhrase('order_' .. tool), icon = 'pencil-ruler', tone = 'accent', scramble = false },
-    }
+    local target = currentTarget()
+    local plan = SX.Plans:Editing()
+    local rows = {}
+    if plan then
+        rows[#rows + 1] = { type = 'text', label = GetPhrase('plan_label'), value = plan, icon = 'clipboard-list', tone = 'warning', scramble = false }
+    end
+    rows[#rows + 1] = { type = 'text', label = GetPhrase('command_tool'), value = GetPhrase('order_' .. tool), icon = 'pencil-ruler', tone = 'accent', scramble = false }
+    if SX.Faction:IsCommander() and tool ~= 'ping' then
+        rows[#rows + 1] = { type = 'text', label = GetPhrase('command_target'), value = target or GetPhrase('command_target_all'), icon = 'users', scramble = false }
+    end
     if tool == 'perimeter' then
         rows[#rows + 1] = { type = 'text', label = GetPhrase('command_points'), value = tostring(#draft), scramble = false }
     elseif tool == 'axis' then
@@ -49,6 +76,9 @@ local function showCard()
         { key = key(Config.Command.undo, 'DEL'), label = GetPhrase('command_undo') },
         { key = key(Config.Command.toggle, 'SPACE'), label = GetPhrase('command_exit') },
     }
+    if canTarget() then
+        table.insert(keys, 1, { key = key(Config.Command.target, 'TAB'), label = GetPhrase('command_target') })
+    end
     if #tools() > 1 then
         table.insert(keys, 1, { key = key(Config.Command.previous, 'Q') .. '/' .. key(Config.Command.next, 'E'), label = GetPhrase('command_switch') })
     end
@@ -61,7 +91,7 @@ local function showCard()
         offset = { x = 2.5, y = 16.0 },
         pauseMenu = true,
         hide = { pauseMenu = false },
-    }, tool .. ':' .. #draft)
+    }, ('%s:%d:%s:%s:%s'):format(tool, #draft, tostring(target), tostring(plan), tostring(canTarget())))
 end
 
 local function showHint()
@@ -120,13 +150,13 @@ local function place(cursor)
     if tool == 'perimeter' then
         local first = draft[1]
         if first and #draft >= 3 and #(vector2(first.x, first.y) - vector2(point.x, point.y)) <= Config.Command.closeDistance then
-            TriggerServerEvent('sxCommand:createOrder', 'perimeter', draft)
+            TriggerServerEvent('sxCommand:createOrder', 'perimeter', draft, currentTarget())
             reset()
             return
         end
         draft[#draft + 1] = point
         if #draft >= Config.Orders.maxPoints then
-            TriggerServerEvent('sxCommand:createOrder', 'perimeter', draft)
+            TriggerServerEvent('sxCommand:createOrder', 'perimeter', draft, currentTarget())
             reset()
         end
         lastPreview = nil
@@ -139,12 +169,12 @@ local function place(cursor)
             lastPreview = nil
             return
         end
-        TriggerServerEvent('sxCommand:createOrder', 'axis', { draft[1], point })
+        TriggerServerEvent('sxCommand:createOrder', 'axis', { draft[1], point }, currentTarget())
         reset()
         return
     end
 
-    TriggerServerEvent('sxCommand:createOrder', tool, { point })
+    TriggerServerEvent('sxCommand:createOrder', tool, { point }, currentTarget())
 end
 
 local function undo()
@@ -187,6 +217,10 @@ function SX.Command:Initialize()
                         elseif pressed(Config.Command.next) then
                             toolIndex = toolIndex % #tools() + 1
                             reset()
+                        end
+
+                        if pressed(Config.Command.target) and canTarget() then
+                            targetIndex = targetIndex % #targets() + 1
                         end
 
                         if pressed(Config.Command.place) then place(cursor) end

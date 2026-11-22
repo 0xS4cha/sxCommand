@@ -7,6 +7,7 @@
    var sxFlows;
    var sxPxPerUnit = 1;
    var sxView = 1;
+   var sxUpright = 0;
    var sxSpecs;
 
    function SX_INIT()
@@ -506,9 +507,14 @@
       }
       if(m.flags != flags || m.color != color)
       {
+         var recolor = m.color != color;
          m.flags = flags;
          m.color = color;
          this.sxDrawMarkerIcon(m.icon,color,flags);
+         if(recolor)
+         {
+            this.sxDrawMarkerLabel(m);
+         }
       }
       var lastPoint = m.history[m.history.length - 1];
       if(lastPoint != undefined && Math.abs(lastPoint.x - x) + Math.abs(lastPoint.y - y) > 120)
@@ -537,6 +543,65 @@
          trail.lineTo(m.history[i].x,m.history[i].y);
          i += 1;
       }
+   }
+
+   function SX_MARKER_LABEL(id, text)
+   {
+      var m = this.sxMarkers[id];
+      if(m == undefined)
+      {
+         return undefined;
+      }
+      m.text = text;
+      this.sxDrawMarkerLabel(m);
+   }
+
+   function sxDrawMarkerLabel(m)
+   {
+      if(m.label != undefined)
+      {
+         m.label.removeMovieClip();
+         m.label = undefined;
+      }
+      if(m.text == undefined || m.text == "")
+      {
+         return undefined;
+      }
+      var pivot = m.mc.createEmptyMovieClip("label",3);
+      var box = pivot.createEmptyMovieClip("box",1);
+      var bg = box.createEmptyMovieClip("bg",1);
+      var tf = box.createTextField("tf",2,0,0,10,10);
+      var fmt = new TextFormat();
+      fmt.font = "$Font2";
+      fmt.size = 12;
+      fmt.color = 0xFFFFFF;
+      tf.embedFonts = true;
+      tf.selectable = false;
+      tf.autoSize = "left";
+      tf.setNewTextFormat(fmt);
+      tf.text = m.text;
+      var w = tf.textWidth + 10;
+      var h = tf.textHeight + 4;
+      tf._x = 3;
+      tf._y = 0;
+      bg.beginFill(0x1B1E2E,80);
+      bg.moveTo(0,0);
+      bg.lineTo(w,0);
+      bg.lineTo(w,h);
+      bg.lineTo(0,h);
+      bg.lineTo(0,0);
+      bg.endFill();
+      bg.beginFill(m.color,100);
+      bg.moveTo(0,0);
+      bg.lineTo(2,0);
+      bg.lineTo(2,h);
+      bg.lineTo(0,h);
+      bg.lineTo(0,0);
+      bg.endFill();
+      box._x = 14;
+      box._y = - h / 2;
+      pivot._rotation = this.sxUpright;
+      m.label = pivot;
    }
 
    function SX_MARKER_REMOVE(id)
@@ -625,6 +690,8 @@
       }
       var inv = 100 / (this.sxPxPerUnit * this.sxView);
       var wave = Math.sin(now / 260);
+      var upright = - Math.atan2(dy,dx) * 180 / 3.141592653589793;
+      this.sxUpright = upright;
 
       for(var id in this.sxMarkers)
       {
@@ -635,6 +702,10 @@
          m.mc._y = m.fy + (m.ty - m.fy) * e;
          m.mc._xscale = inv;
          m.mc._yscale = inv;
+         if(m.label != undefined)
+         {
+            m.label._rotation = upright;
+         }
          m.halo.clear();
          if((m.flags & 1) != 0)
          {

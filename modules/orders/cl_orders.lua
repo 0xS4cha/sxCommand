@@ -11,25 +11,39 @@ COLORS = {
     heat = 0xFF5A4F,
 }
 
-function SX.Orders:Draw(layer, id, kind, points)
+-- dim: the order is for another squad, it is drawn faded and without animation
+function SX.Orders:Draw(layer, id, kind, points, dim)
     local p = points[1]
+    local fade = dim and 0.35 or 1.0
+    local border = dim and 1 or 3
+    local function alpha(value) return math.floor(value * fade) end
+    local function flags(value) return dim and 0 or value end
     if kind == 'rally' then
-        Atlas.Circle(layer, id, p.x, p.y, Config.Orders.radius.rally, COLORS.rally, 55, 1, 3, 1)
+        Atlas.Circle(layer, id, p.x, p.y, Config.Orders.radius.rally, COLORS.rally, alpha(55), 1, border, flags(1))
     elseif kind == 'danger' then
-        Atlas.Circle(layer, id, p.x, p.y, Config.Orders.radius.danger, COLORS.danger, 75, 2, 3, 3)
+        Atlas.Circle(layer, id, p.x, p.y, Config.Orders.radius.danger, COLORS.danger, alpha(75), 2, border, flags(3))
     elseif kind == 'objective' then
-        Atlas.Circle(layer, id, p.x, p.y, Config.Orders.radius.objective, COLORS.objective, 65, 0, 3, 1)
+        Atlas.Circle(layer, id, p.x, p.y, Config.Orders.radius.objective, COLORS.objective, alpha(65), 0, border, flags(1))
     elseif kind == 'axis' and points[2] then
-        Atlas.Arrow(layer, id, p, points[2], COLORS.axis, 7, 4)
+        Atlas.Arrow(layer, id, p, points[2], COLORS.axis, dim and 3 or 7, flags(4))
     elseif kind == 'perimeter' and #points >= 3 then
-        Atlas.Polygon(layer, id, points, COLORS.perimeter, 18, 0, 3, 2)
+        Atlas.Polygon(layer, id, points, COLORS.perimeter, alpha(18), 0, border, flags(2))
     end
 end
 
+-- An order for a squad is faded for the members of the other squads, commanders see every order
+local function forOthers(order)
+    if not order.squad or SX.Faction:IsCommander() then return false end
+    return SX.Squads:MySquad() ~= order.squad
+end
+
+local last = {}
+
 function SX.Orders:Render(list)
+    last = list or {}
     Atlas.ClearLayer('orders')
     for _, order in ipairs(list or {}) do
-        self:Draw('orders', 'o' .. order.id, order.kind, order.points)
+        self:Draw('orders', 'o' .. order.id, order.kind, order.points, forOthers(order))
     end
 end
 
@@ -39,10 +53,19 @@ function SX.Orders:Initialize()
         SX.Orders:Render(list)
     end)
 
-    RegisterNetEvent('sxCommand:newOrder', function(kind, author)
+    -- the faded orders depend on the squad of the player
+    RegisterNetEvent('sxCommand:callsign', function()
+        if SX.Faction:Get() then SX.Orders:Render(last) end
+    end)
+
+    RegisterNetEvent('sxCommand:newOrder', function(kind, author, squad)
+        local rows = { { type = 'text', label = GetPhrase('order_hint'), value = GetPhrase('order_hint_value'), icon = 'map', tone = 'accent' } }
+        if squad then
+            table.insert(rows, 1, { type = 'text', label = GetPhrase('command_target'), value = squad, icon = 'users', tone = 'warning', scramble = false })
+        end
         local shown = HelpUI.Show('order', 'order', {
             header = { subtitle = GetPhrase('order_from', author), title = GetPhrase('order_' .. kind), watermark = GetPhrase('order_watermark') },
-            rows = { { type = 'text', label = GetPhrase('order_hint'), value = GetPhrase('order_hint_value'), icon = 'map', tone = 'accent' } },
+            rows = rows,
             duration = 6000,
             position = 'top-right',
         })

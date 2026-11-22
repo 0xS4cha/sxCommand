@@ -6,6 +6,10 @@ exports('IsCommander', function()
     return SX.Faction:IsCommander()
 end)
 
+exports('GetCallsign', function()
+    return SX.Squads:Mine()
+end)
+
 exports('Ping', function(coords)
     SX.Intel:SendPing(coords)
 end)

@@ -14,6 +14,13 @@ function Atlas.Load()
 end
 
 local view = 1.0
+local defaultPauseScale = Config.Display.pauseScale
+
+-- The scale set with the calibration command is kept on this computer
+local savedScale = GetResourceKvpFloat('pauseScale')
+if savedScale and savedScale > 0.0 then
+    Config.Display.pauseScale = savedScale
+end
 
 function Atlas.SetView(scale)
     view = scale
@@ -36,9 +43,14 @@ end
 
 RegisterCommand(Config.Display.scaleCommand, function(_, args)
     local scale = tonumber(args[1])
-    if not scale or scale <= 0 then
+    if args[1] == 'reset' then
+        DeleteResourceKvp('pauseScale')
+        scale = defaultPauseScale
+    elseif not scale or scale <= 0 then
         print(('[sxCommand] pauseScale = %.2f'):format(Config.Display.pauseScale))
         return
+    else
+        SetResourceKvpFloat('pauseScale', scale + 0.0)
     end
     Config.Display.pauseScale = scale
     if view ~= 1.0 or IsPauseMenuActive() then Atlas.SetView(scale) end
@@ -95,6 +107,11 @@ end
 -- flags: 1 injured, 2 firing, 4 commander. heading in GTA degrees.
 function Atlas.Marker(id, x, y, heading, color, flags, duration)
     Atlas.Call('SX_MARKER', tostring(id), x + 0.0, -y + 0.0, -(heading or 0.0) + 0.0, color, flags or 0, (duration or 1.0) + 0.0)
+end
+
+-- Text drawn next to a unit (its callsign), an empty string removes it
+function Atlas.MarkerLabel(id, text)
+    Atlas.Call('SX_MARKER_LABEL', tostring(id), text or '')
 end
 
 function Atlas.RemoveMarker(id)
