@@ -14,6 +14,13 @@ function Atlas.Load()
 end
 
 local view = 1.0
+local defaultPauseScale = Config.Display.pauseScale
+
+-- The scale set with the calibration command is kept on this computer
+local savedScale = GetResourceKvpFloat('pauseScale')
+if savedScale and savedScale > 0.0 then
+    Config.Display.pauseScale = savedScale
+end
 
 function Atlas.SetView(scale)
     view = scale
@@ -36,9 +43,14 @@ end
 
 RegisterCommand(Config.Display.scaleCommand, function(_, args)
     local scale = tonumber(args[1])
-    if not scale or scale <= 0 then
+    if args[1] == 'reset' then
+        DeleteResourceKvp('pauseScale')
+        scale = defaultPauseScale
+    elseif not scale or scale <= 0 then
         print(('[sxCommand] pauseScale = %.2f'):format(Config.Display.pauseScale))
         return
+    else
+        SetResourceKvpFloat('pauseScale', scale + 0.0)
     end
     Config.Display.pauseScale = scale
     if view ~= 1.0 or IsPauseMenuActive() then Atlas.SetView(scale) end
